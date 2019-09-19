@@ -45,6 +45,7 @@ public class Query3 {
         ) throws IOException, InterruptedException {
             String transactionEntry = value.toString();
             String[] transactionValues = transactionEntry.split(",");
+
             // key - customer id
             // value - transaction num items, transaction total
             context.write(new Text(transactionValues[1]), new Text("transaction," + transactionValues[3] + "," + transactionValues[2]));
@@ -73,21 +74,30 @@ public class Query3 {
                         minTransactions = Integer.parseInt(valueArr[1]);
                     }
                     totalTransactionSum += Float.parseFloat(valueArr[2]);
-                    totalNumberOfTransactions += Integer.parseInt(valueArr[1]);
+                    totalNumberOfTransactions += 1;
                 }
             }
+            // key - customer id
+            // value - customer id, customer name, salary, total number of transactions, total transaction sum, min transaction items
             context.write(key, new Text(key + "," + customerName + "," + customerSalary + "," + totalNumberOfTransactions + "," + totalTransactionSum + "," + minTransactions));
         }
     }
 
 
     public static void main(String[] args) throws Exception {
-        String inputPathCustomers = "hdfs://localhost:9000/ds503/hw1/input/customers.txt";
-        String inputPathTrasancations = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
-        String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query3/";
+
+        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt";
+        String inputPathTrasancations = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt";
+        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/shree_output/query3";
+
+
         Configuration conf = new Configuration();
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
+        // add the below code if you are reading/writing from/to HDFS
+        // String inputPathCustomers = "hdfs://localhost:9000/ds503/hw1/input/customers.txt";
+        // String inputPathTrasancations = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
+        // String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query3/";
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
 
         Job job = Job.getInstance(conf, "Query3JoinReducer");
 

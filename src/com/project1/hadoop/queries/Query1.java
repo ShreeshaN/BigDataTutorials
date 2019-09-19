@@ -34,7 +34,9 @@ public class Query1 {
             String customerEntry = value.toString();
             String[] customerValues = customerEntry.split(",");
             int age = Integer.parseInt(customerValues[2]);
-            if (age > 20 && age <= 50) {
+            if (age >= 20 && age <= 50) {
+                // key - customer id
+                // value - complete customer row
                 context.write(new Text(customerValues[0]), new Text(customerEntry));
             }
         }
@@ -43,11 +45,15 @@ public class Query1 {
 
 
     public static void main(String[] args) throws Exception {
-        String inputPath = "hdfs://localhost:9000/ds503/hw1/input/customers.txt";
-        String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query1/";
+        String inputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt";
+        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/shree_output/query1/";
+
         Configuration conf = new Configuration();
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
+        // add the below code if you are reading/writing from/to HDFS
+        // String inputPath = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
+        // String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query2/";
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
 
         Job job = Job.getInstance(conf, "CustomerAgeBelow20Above50");
         job.setJarByClass(Query1.class);

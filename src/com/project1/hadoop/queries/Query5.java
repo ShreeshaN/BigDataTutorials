@@ -21,13 +21,13 @@ import java.util.Map;
 
 public class Query5 {
     /**
-     *   Assume we want to design an analytics task on the data as follows:
-     *     1) The Age attribute is divided into six groups, which are [10, 20), [20, 30), [30, 40), [40, 50), [50, 60), and [60, 70].
-     *     The bracket “[“ means the lower bound of a range is included, where as “)” means the upper bound of a range is excluded.
-     *     2) Within each of the above age ranges, further division is performed based on the “Gender”, i.e.,
-     *        each of the 6 age groups is further divided into two groups.
-     *     3) For each group, we need to report the following info:
-     *     --> Age Range, Gender, MinTransTotal, MaxTransTotal, AvgTransTotal
+     * Assume we want to design an analytics task on the data as follows:
+     * 1) The Age attribute is divided into six groups, which are [10, 20), [20, 30), [30, 40), [40, 50), [50, 60), and [60, 70].
+     * The bracket “[“ means the lower bound of a range is included, where as “)” means the upper bound of a range is excluded.
+     * 2) Within each of the above age ranges, further division is performed based on the “Gender”, i.e.,
+     * each of the 6 age groups is further divided into two groups.
+     * 3) For each group, we need to report the following info:
+     * --> Age Range, Gender, MinTransTotal, MaxTransTotal, AvgTransTotal
      */
 
 
@@ -82,11 +82,16 @@ public class Query5 {
                 throw new NullPointerException("Passed age variable is null");
             }
             if (age.length() == 1) {
-                return "0-10";
+                return "[0-10)";
             }
             int start = Integer.parseInt(age.split("")[0]);
             int startPlusOne = start + 1;
-            return start + "0-" + startPlusOne + "0";
+            if (start == 6 | start == 7) {
+                return "[" + start + "0-" + startPlusOne + "0" + "]";
+            } else {
+                return "[" + start + "0-" + startPlusOne + "0" + ")";
+            }
+
         }
 
         public void map(Object key, Text value, Context context
@@ -96,6 +101,7 @@ public class Query5 {
             String[] customerAgeAndGender = customerIdAndAgeWithGenderMap.get(transactionValues[1]).split(",");
             String ageRange = getAge(customerAgeAndGender[0]);
             String customerGender = customerAgeAndGender[1];
+
             // key - age range, gender
             // value - transaction total
             context.write(new Text(ageRange + "," + customerGender), new Text(transactionValues[2]));
@@ -127,18 +133,27 @@ public class Query5 {
 
             }
             avgTransactionTotal = totalTransacionSum / count;
+
+            // key - null (0)
+            // value - Age Range, Gender, MinTransTotal, MaxTransTotal, AvgTransTotal
             context.write(new Text("0"), new Text(key + "," + minTransactiontotal + "," + maxTransactionTotal + "," + avgTransactionTotal));
         }
     }
 
 
     public static void main(String[] args) throws Exception {
-        String inputPathCustomers = "hdfs://localhost:9000/ds503/hw1/input/customers.txt";
-        String inputPathTrasancations = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
-        String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query5/";
+        String inputPathTransactions = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt";
+        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt";
+        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/shree_output/query5/";
+
         Configuration conf = new Configuration();
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
+
+        // add the below code if you are reading/writing from/to HDFS
+        // String inputPathTransactions = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
+        // String inputPathCustomers = "hdfs://localhost:9000/ds503/hw1/input/customers.txt";
+        // String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query4/";
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
 
         Job job = Job.getInstance(conf, "Query5");
 
@@ -161,7 +176,7 @@ public class Query5 {
         }
 
 
-        FileInputFormat.addInputPath(job, new Path(inputPathTrasancations));
+        FileInputFormat.addInputPath(job, new Path(inputPathTransactions));
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);

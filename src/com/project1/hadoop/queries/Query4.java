@@ -75,6 +75,7 @@ public class Query4 {
 
             String transactionStr = value.toString();
             String[] transactionValues = transactionStr.split(",");
+
             //key - country code
             //value - customer id + transtotal
             String customerCountryCode = customerIdAndCountryCodeMap.getOrDefault(transactionValues[1], "Country code not found");
@@ -119,11 +120,18 @@ public class Query4 {
 
 
     public static void main(String[] args) throws Exception {
-        String inputPath = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
-        String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query4/";
+        String inputPathTransactions = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt";
+        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt";
+        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/shree_output/query4/";
+
         Configuration conf = new Configuration();
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
+
+        // add the below code if you are reading/writing from/to HDFS
+        // String inputPathTransactions = "hdfs://localhost:9000/ds503/hw1/input/transactions.txt";
+        // String inputPathCustomers = "hdfs://localhost:9000/ds503/hw1/input/customers.txt";
+        // String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query4/";
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
+        // conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
 
         Job job = Job.getInstance(conf, "Query4SingleMapReduceUsingDistributedCache");
 
@@ -139,14 +147,14 @@ public class Query4 {
 
         // Add distributed cache file
         try {
-            job.addCacheFile(new URI("hdfs://localhost:9000/ds503/hw1/input/customers.txt"));
+            job.addCacheFile(new URI(inputPathCustomers));
         } catch (Exception e) {
             System.out.println("Customers file Not Added");
             System.exit(1);
         }
 
 
-        FileInputFormat.addInputPath(job, new Path(inputPath));
+        FileInputFormat.addInputPath(job, new Path(inputPathTransactions));
         FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
