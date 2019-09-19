@@ -9,23 +9,15 @@
 */
 
 
-customers = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/kingspp_data/customers_sample.csv' USING PigStorage(',') AS
+customers = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt' USING PigStorage(',') AS
     (customerId:int, customerName:chararray, age:int, gender:chararray, countryCode:int, salary:float);
-limit_data = LIMIT customers 2;
-DUMP limit_data;
 
-transactions = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/kingspp_data/transactions_sample.csv' USING PigStorage(',') AS
+transactions = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt' USING PigStorage(',') AS
     (transactionId:int, transCustomerId:int, transactionTotal:float, transactionNumItems:int, transactionDesc:chararray);
-limit_data = LIMIT transactions 10;
-DUMP limit_data;
 
 joined = JOIN customers by customerId, transactions by transCustomerId USING 'replicated';
-limit_data = LIMIT joined 10;
-DUMP limit_data;
 
 groupedCustomers = GROUP joined by customerId;
-limit_data = LIMIT groupedCustomers 10;
-DUMP limit_data;
 
 result = FOREACH groupedCustomers GENERATE group,
                 joined.customerName,

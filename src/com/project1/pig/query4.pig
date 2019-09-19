@@ -9,19 +9,13 @@
 */
 
 
-customers = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/kingspp_data/customers_sample.csv' USING PigStorage(',') AS
+customers = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt' USING PigStorage(',') AS
     (customerId:int, customerName:chararray, age:int, gender:chararray, countryCode:int, salary:float);
-limit_data = LIMIT customers 2;
-DUMP limit_data;
 
-transactions = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/kingspp_data/transactions_sample.csv' USING PigStorage(',') AS
+transactions = LOAD '/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt' USING PigStorage(',') AS
     (transactionId:int, transCustomerId:int, transactionTotal:float, transactionNumItems:int, transactionDesc:chararray);
-limit_data = LIMIT transactions 10;
-DUMP limit_data;
 
 joined = JOIN customers by customerId, transactions by transCustomerId;
-limit_data = LIMIT joined 10;
-DUMP limit_data;
 
 AgeLessThan10 = FILTER joined BY (chararray)SIZE((chararray)age) == '1';
 AgeMoreThan10 = FILTER joined BY (chararray)SIZE((chararray)age) != '1';
@@ -41,24 +35,21 @@ ageRangeForAgeMoreThan10 = FOREACH AgeMoreThan10
 customerIdWithAgeRanges = UNION ageRangeForAgeLessThan10, ageRangeForAgeMoreThan10;
 
 grouped = GROUP customerIdWithAgeRanges by cid;
-dump grouped;
 
 distinctGrouped = FOREACH grouped {
 b = customerIdWithAgeRanges.(ageRange);
 c = distinct b;
 generate group as cid, flatten(c) as ageRange;
 }
-dump distinctGrouped;
 
 joinedCustomers = JOIN distinctGrouped by cid, customers by customerId;
 
 joinedCustomersAndTransactions = JOIN joinedCustomers by cid, transactions by transCustomerId;
 
 groupedCustomers = GROUP joinedCustomersAndTransactions by (ageRange, gender);
-limit_data = LIMIT groupedCustomers 10;
-DUMP limit_data;
 
 result = FOREACH groupedCustomers GENERATE group,
                 MIN(joinedCustomersAndTransactions.transactionTotal),
                 MAX(joinedCustomersAndTransactions.transactionTotal),
                 AVG(joinedCustomersAndTransactions.transactionTotal);
+dump result;
