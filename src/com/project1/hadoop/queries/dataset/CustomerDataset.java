@@ -1,10 +1,11 @@
 package com.project1.hadoop.queries.dataset;
 
 import com.project1.hadoop.beans.Customer;
-import com.project1.hadoop.utils.GeneralUtilities;
-import com.project1.hadoop.utils.StringConstants;
+import com.utils.GeneralUtilities;
+import com.utils.StringConstants;
 
 import java.util.Random;
+
 
 public class CustomerDataset {
 

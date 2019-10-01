@@ -1,7 +1,7 @@
 package com.project1.hadoop.queries.dataset;
 
-import com.project1.hadoop.utils.GeneralUtilities;
-import com.project1.hadoop.utils.StringConstants;
+import com.utils.GeneralUtilities;
+import com.utils.StringConstants;
 import com.project1.hadoop.beans.Transaction;
 
 import java.util.Random;

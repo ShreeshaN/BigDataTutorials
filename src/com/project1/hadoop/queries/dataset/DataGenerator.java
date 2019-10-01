@@ -2,10 +2,11 @@ package com.project1.hadoop.queries.dataset;
 
 import com.project1.hadoop.beans.Customer;
 import com.project1.hadoop.beans.Transaction;
-import com.project1.hadoop.utils.GeneralUtilities;
+import com.utils.GeneralUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class DataGenerator {
     /**

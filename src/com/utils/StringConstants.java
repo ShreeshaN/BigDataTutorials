@@ -1,7 +1,8 @@
-package com.project1.hadoop.utils;
+package com.utils;
 
 public class StringConstants {
 
     public static final String ALPHABETS = "QWERTYUIOPLKJHGFDSAZXCVBNM";
+    public static final String COMMA = ",";
 
 }
