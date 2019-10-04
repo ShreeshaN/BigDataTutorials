@@ -173,19 +173,29 @@ public class KMeans {
 
 
     public static void main(String[] args) throws Exception {
+//        System.out.println();
+//        System.exit(1);
+
+        if (args.length < 4) {
+            throw new Exception("Pass all the required arguments. Input file, Centroids file path, Output filepath, number of iterations");
+        }
         Configuration conf = new Configuration();
-        String inputData = "hdfs://localhost:9000/ds503/hw2/input/p_sample.txt";
-        String inputCentroidsPath = "hdfs://localhost:9000/ds503/hw2/input/sample_centroids.txt";
-        String newCentroidsPath = "hdfs://localhost:9000/ds503/hw2/output¬/kmeans/";
+        String inputData = args[0];
+        String inputCentroidsPath = args[1];
+        String newCentroidsPath = args[2];
         String centroidsFilename = "centroids.txt";
         int numOfReducers = 5;
-
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
+        int numOfIterations = Integer.parseInt(args[3]);
+        String hadoopHome = System.getenv("HADOOP_HOME");
+        if (hadoopHome == null) {
+            throw new Exception("HADOOP_HOME not found. Please make sure system path has HADOOP_HOME point to hadoop installation directory");
+        }
+        conf.addResource(new Path(hadoopHome + "/etc/hadoop/core-site.xml"));
+        conf.addResource(new Path(hadoopHome + "/etc/hadoop/hdfs-site.xml"));
 
         FileSystem fs = FileSystem.get(conf);
         fs.delete(new Path(newCentroidsPath), true);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < numOfIterations; i++) {
             int iMinus1 = i - 1;
             System.out.println("Running kmeans for " + i);
             Job job = Job.getInstance(conf, "KMeans");
@@ -209,8 +219,7 @@ public class KMeans {
                     job.addCacheFile(new URI(newCentroidsPath + "/" + iMinus1 + "/" + centroidsFilename));
 
             } catch (Exception e) {
-                System.out.println("Centroids file Not Added");
-                System.exit(1);
+                throw new Exception("Centroids file Not Added");
             }
             job.setNumReduceTasks(numOfReducers);
             job.waitForCompletion(true);
@@ -235,7 +244,8 @@ public class KMeans {
                 }
             }
         }
-        fs.close();
+        if (fs != null)
+            fs.close();
     }
 
 }
