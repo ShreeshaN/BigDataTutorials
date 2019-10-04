@@ -1,13 +1,12 @@
 /**
-@created on: 18/3/19,
-@author: Shreesha N,
-@version: v0.0.1
-@system name: badgod
-Description:
-
-..todo::
-
-*/
+ * @created on: 18/3/19,
+ * @author: Shreesha N,
+ * @version: v0.0.1
+ * @system name: badgod
+ * Description:
+ * <p>
+ * ..todo::
+ */
 
 package com.project2.kmeans;
 
@@ -63,7 +62,6 @@ public class KMeans {
                         centroids.add(c);
 
                     }
-                    System.out.println("Len of map " + centroidIdMap.size());
                 } catch (Exception e) {
                     System.out.println("Unable to read centroids cached File");
                     System.exit(1);
@@ -173,27 +171,18 @@ public class KMeans {
 
     }
 
-    public static boolean compareCentroids(String oldCentroidFile, String newCentroidFile, FileSystem fs) throws IOException {
-        List<String> oldCentroids = GeneralUtilities.readFileIntoIterableHDFS(oldCentroidFile, fs);
-        oldCentroids.replaceAll(String::trim);
-        List<String> newCentroids = GeneralUtilities.readFileIntoIterableHDFS(newCentroidFile, fs);
-        newCentroids.replaceAll(String::trim);
-
-        Collections.sort(oldCentroids);
-        Collections.sort(newCentroids);
-        return oldCentroids.equals(newCentroids);
-    }
-
 
     public static void main(String[] args) throws Exception {
-
         Configuration conf = new Configuration();
-        String inputRectangles = "hdfs://localhost:9000/ds503/hw2/input/prathyush/p_sample.txt";
-        String inputCentroidsPath = "hdfs://localhost:9000/ds503/hw2/input/prathyush/sample_centroids.txt";
-        String newCentroidsPath = "hdfs://localhost:9000/ds503/hw2/output/prathyush/kmeans/";
+        String inputData = "hdfs://localhost:9000/ds503/hw2/input/p_sample.txt";
+        String inputCentroidsPath = "hdfs://localhost:9000/ds503/hw2/input/sample_centroids.txt";
+        String newCentroidsPath = "hdfs://localhost:9000/ds503/hw2/output¬/kmeans/";
+        String centroidsFilename = "centroids.txt";
+        int numOfReducers = 5;
 
         conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
         conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
+
         FileSystem fs = FileSystem.get(conf);
         fs.delete(new Path(newCentroidsPath), true);
         for (int i = 0; i < 6; i++) {
@@ -209,7 +198,7 @@ public class KMeans {
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
 
-            FileInputFormat.addInputPath(job, new Path(inputRectangles));
+            FileInputFormat.addInputPath(job, new Path(inputData));
             FileOutputFormat.setOutputPath(job, new Path(newCentroidsPath + "/" + i));
 
             // Add distributed cache file
@@ -217,23 +206,36 @@ public class KMeans {
                 if (i == 0)
                     job.addCacheFile(new URI(inputCentroidsPath));
                 else
-                    job.addCacheFile(new URI(newCentroidsPath + "/" + iMinus1 + "/part-r-00000"));
+                    job.addCacheFile(new URI(newCentroidsPath + "/" + iMinus1 + "/" + centroidsFilename));
 
             } catch (Exception e) {
                 System.out.println("Centroids file Not Added");
                 System.exit(1);
             }
-
+            job.setNumReduceTasks(numOfReducers);
             job.waitForCompletion(true);
+            List<String> intermediateCentroids = new ArrayList<>();
 
-            // compare logic
+            // iterate over all the reducer outputs and merge them together, write it to a single file
+            for (int j = 0; j < numOfReducers; j++) {
+                intermediateCentroids.addAll(GeneralUtilities.readFileIntoIterableHDFS(newCentroidsPath + "/" + i + "/part-r-0000" + j, fs));
+            }
+            GeneralUtilities.writeIterableToFileHDFS(intermediateCentroids, newCentroidsPath + "/" + i + "/" + centroidsFilename, fs);
+
+
+            // if i==0 which means its the first iteration, do not run the compare logic
             if (i != 0) {
-                if (KMeans.compareCentroids(newCentroidsPath + iMinus1 + "/part-r-00000", newCentroidsPath + i + "/" + "part-r-00000", fs)) {
+
+                // compare logic, pick the single file that was saved in previous step and compare it to the single file that was
+                List<String> oldCentroids = GeneralUtilities.readFileIntoIterableHDFS(newCentroidsPath + iMinus1 + "/" + centroidsFilename, fs);
+                List<String> newCentroids = GeneralUtilities.readFileIntoIterableHDFS(newCentroidsPath + i + "/" + centroidsFilename, fs);
+                if (GeneralUtilities.compareLists(oldCentroids, newCentroids)) {
                     System.out.println("Kmeans algorithm converged at " + i + " iterations. Terminating");
                     break;
                 }
-
             }
         }
+        fs.close();
     }
+
 }

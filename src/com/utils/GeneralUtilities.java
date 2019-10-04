@@ -1,13 +1,12 @@
 /**
-@created on: 18/3/19,
-@author: Shreesha N,
-@version: v0.0.1
-@system name: badgod
-Description:
-
-..todo::
-
-*/
+ * @created on: 18/3/19,
+ * @author: Shreesha N,
+ * @version: v0.0.1
+ * @system name: badgod
+ * Description:
+ * <p>
+ * ..todo::
+ */
 
 package com.utils;
 
@@ -45,7 +44,6 @@ public class GeneralUtilities {
             if (writer != null) {
                 writer.close();
             }
-
         }
     }
 
@@ -61,11 +59,10 @@ public class GeneralUtilities {
         OutputStream os = fs.create(file);
         BufferedWriter br = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
         for (Object s : listOfObjects) {
-            br.write(s.toString());
+            br.write(s.toString() + "\n");
 
         }
         br.close();
-        fs.close();
     }
 
     public static List<String> readFileIntoIterable(String filename) throws IOException {
@@ -119,11 +116,18 @@ public class GeneralUtilities {
             br.write(s.toString() + "\n");
         }
         br.close();
-        fs.close();
     }
 
     public static boolean checkIfCoordinateWithinRectangle(float bottomLeftX, float bottomLeftY, float topRightX, float topRightY, float x, float y) {
         return x >= bottomLeftX && x <= topRightX && y >= bottomLeftY && y <= topRightY;
 
+    }
+
+    public static boolean compareLists(List<String> l1, List<String> l2) {
+        l1.replaceAll(String::trim);
+        l2.replaceAll(String::trim);
+        Collections.sort(l1);
+        Collections.sort(l2);
+        return l1.equals(l2);
     }
 }
