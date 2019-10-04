@@ -22,9 +22,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 // doubts
@@ -112,26 +110,37 @@ public class OutlierInXYSpace {
                         // output
                         // key - "outlier"
                         // value - point
-                        context.write(new Text("Outlier"), new Text(point[0] + "," + point[1]));
+                        context.write(new Text(""), new Text(point[0] + "," + point[1]));
                 }
             }
         }
     }
 
     public static void main(String[] args) throws Exception {
-
+        if (args.length < 5) {
+            throw new Exception("Pass all the required arguments. Input file, Output filepath, Output filename, radius, threshold");
+        }
         Configuration conf = new Configuration();
 
-        String inputDataPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project2/xy_coordinates_test2";
-        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/project2/outlier_xy_space_test2/";
-
-        conf.set("xRange", "20");
-        conf.set("yRange", "20");
-        conf.set("radius", "4");
-        conf.set("thresholdK", "4");
-        conf.set("divisions", "50");
+        String inputDataPath = args[0];
+        String outputPath = args[1];
+        String outliersFilename = args[2];
+        conf.set("xRange", "10000");
+        conf.set("yRange", "10000");
+        conf.set("radius", args[3]);
+        conf.set("thresholdK", args[4]);
+        conf.set("divisions", "100");
         conf.set("outputPath", outputPath);
+        int reducers = 5;
 
+
+        // add the below code if you are reading/writing from/to HDFS
+        String hadoopHome = System.getenv("HADOOP_HOME");
+        if (hadoopHome == null) {
+            throw new Exception("HADOOP_HOME not found. Please make sure system path has HADOOP_HOME point to hadoop installation directory");
+        }
+        conf.addResource(new Path(hadoopHome + "/etc/hadoop/core-site.xml"));
+        conf.addResource(new Path(hadoopHome + "/etc/hadoop/hdfs-site.xml"));
 
         FileSystem fs = FileSystem.get(conf);
         fs.delete(new Path(outputPath), true);
@@ -140,6 +149,7 @@ public class OutlierInXYSpace {
         job.setJarByClass(OutlierInXYSpace.class);
         job.setMapperClass(OutlierInXYSpace.CustomMapper.class);
         job.setReducerClass(OutlierInXYSpace.CustomReducer.class);
+        job.setNumReduceTasks(reducers);
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
@@ -149,14 +159,16 @@ public class OutlierInXYSpace {
 
         job.waitForCompletion(true);
 
-        int reducers = job.getNumReduceTasks();
 
-        // removing duplicates which help in counting the number of points around a given point
-        // but they are not required to be in output file
+        // 1. removing duplicates points which played a crucial role in counting the number of points around a given point
+        //      but they are not required to be in output file
+        // 2. Collecting all the reduver outputs and appending it to single file, ofcourse by removing duplicates
+        Set<String> outliers = new HashSet<>();
         for (int i = 0; i < reducers; i++) {
-            GeneralUtilities.removeDuplicates(outputPath + "/part-r-0000" + i, FileSystem.get(conf));
+            outliers.addAll(GeneralUtilities.readFileIntoIterableHDFS(outputPath + "/part-r-0000" + i, fs));
         }
-
-
+        GeneralUtilities.writeIterableToFileHDFS(outliers, outputPath + "/" + outliersFilename, fs);
+        if (fs != null)
+            fs.close();
     }
 }

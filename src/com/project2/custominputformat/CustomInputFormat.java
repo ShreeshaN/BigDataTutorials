@@ -70,6 +70,10 @@ public class CustomInputFormat {
 
     public static void main(String[] args) throws Exception {
 
+        if (args.length < 2) {
+            throw new Exception("Pass all the required arguments. Input file and Output filepath");
+        }
+
         Configuration conf = new Configuration();
 
         String inputDataPath = args[0];
