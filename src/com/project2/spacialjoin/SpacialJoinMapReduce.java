@@ -1,6 +1,17 @@
+/**
+ * @created on: 8/4/19,
+ * @author: Shreesha N,
+ * @version: v0.0.1
+ * @system name: badgod
+ * Description:
+ * <p>
+ * ..todo::
+ */
+
 package com.project2.spacialjoin;
 
 import com.project2.beans.Rectangle;
+import com.utils.GeneralUtilities;
 import com.utils.StringConstants;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -85,14 +96,14 @@ public class SpacialJoinMapReduce {
             String[] xyCoordinate = value.toString().split(",");
             float x = Float.parseFloat(xyCoordinate[0]);
             float y = Float.parseFloat(xyCoordinate[1]);
-            boolean isCoordinateWithinWindow = Rectangle.checkIfCoordinateWithinRectangle(wX1, wY1, wX2, wY2, x, y);
+            boolean isCoordinateWithinWindow = GeneralUtilities.checkIfCoordinateWithinRectangle(wX1, wY1, wX2, wY2, x, y);
             if (isCoordinateWithinWindow) {
                 for (Rectangle rectangle : rectangles) {
                     float bottomLeftX = rectangle.getBottomX();
                     float bottomLeftY = rectangle.getBottomY();
                     float topRightX = bottomLeftX + rectangle.getW();
                     float topRightY = bottomLeftY + rectangle.getH();
-                    boolean result = Rectangle.checkIfCoordinateWithinRectangle(bottomLeftX, bottomLeftY, topRightX, topRightY, x, y);
+                    boolean result = GeneralUtilities.checkIfCoordinateWithinRectangle(bottomLeftX, bottomLeftY, topRightX, topRightY, x, y);
 
                     // key - rectange_string(bottomx,bottomy,h,w)
                     // value - xy_coordinate

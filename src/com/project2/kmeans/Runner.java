@@ -1,3 +1,13 @@
+/**
+ * @created on: 18/3/19,
+ * @author: Shreesha N,
+ * @version: v0.0.1
+ * @system name: badgod
+ * Description:
+ * <p>
+ * ..todo::
+ */
+
 package com.project2.kmeans;
 
 import com.utils.GeneralUtilities;
@@ -24,12 +34,6 @@ public class Runner {
     }
 
     public static void main(String[] args) throws Exception {
-        // String inputPathCustomers = "hdfs://localhost:9000//ds503/hw2/input/centroids.txt";
-        // String outputPath = "hdfs://localhost:9000/ds503/hw1/output/query2/"
-
-//        String inputRectangles = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project2/rectangles.txt";
-//        String oldCentroidsPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project2/centroids.txt";
-//        String newCentroidsPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/project2/kmeans/";
         Configuration conf = new Configuration();
         conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
         conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));

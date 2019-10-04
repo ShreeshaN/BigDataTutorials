@@ -1,3 +1,14 @@
+/**
+@created on: 18/3/19,
+@author: Shreesha N,
+@version: v0.0.1
+@system name: badgod
+Description:
+
+..todo::
+
+*/
+
 package com.project2.beans;
 
 import com.utils.StringConstants;
@@ -8,6 +19,7 @@ import org.apache.hadoop.io.Writable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
 
 public class Airfield implements Writable {
 

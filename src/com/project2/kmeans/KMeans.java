@@ -1,3 +1,14 @@
+/**
+@created on: 18/3/19,
+@author: Shreesha N,
+@version: v0.0.1
+@system name: badgod
+Description:
+
+..todo::
+
+*/
+
 package com.project2.kmeans;
 
 import com.utils.GeneralUtilities;
@@ -18,6 +29,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.*;
 
+
 public class KMeans {
     /**
      * Refer to project2.pdf - problem 2 for question.
@@ -36,20 +48,8 @@ public class KMeans {
                 try {
 
                     String line = "";
-
-                    // Create a FileSystem object and pass the
-                    // configuration object in it. The FileSystem
-                    // is an abstract base class for a fairly generic
-                    // filesystem. All user code that may potentially
-                    // use the Hadoop Distributed File System should
-                    // be written to use a FileSystem object.
                     FileSystem fs = FileSystem.get(context.getConfiguration());
                     Path getFilePath = new Path(cacheFiles[0].toString());
-
-                    // We open the file using FileSystem object,
-                    // convert the input byte stream to character
-                    // streams using InputStreamReader and wrap it
-                    // in BufferedReader to make it more efficient
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(getFilePath)));
                     int lineNumber = 0;
                     while ((line = reader.readLine()) != null) {
@@ -166,7 +166,6 @@ public class KMeans {
             for (int i = 0; i < summedUpValues.size(); i++) {
                 summedUpValues.set(i, summedUpValues.get(i) / globalCount);
             }
-
             // key - centroid id
             // value - new centroid
             context.write(new Text(""), new Text(StringUtils.join(summedUpValues, ",")));
@@ -187,18 +186,12 @@ public class KMeans {
 
 
     public static void main(String[] args) throws Exception {
-        // clusters points in rectangles file (bottomx, bottomy, h, w)
 
         Configuration conf = new Configuration();
-
-        // add the below code if you are reading/writing from/to HDFS
         String inputRectangles = "hdfs://localhost:9000/ds503/hw2/input/prathyush/p_sample.txt";
         String inputCentroidsPath = "hdfs://localhost:9000/ds503/hw2/input/prathyush/sample_centroids.txt";
         String newCentroidsPath = "hdfs://localhost:9000/ds503/hw2/output/prathyush/kmeans/";
 
-//        String inputRectangles = "hdfs://localhost:9000/ds503/hw2/input/rectangles.txt";
-//        String inputCentroidsPath = "hdfs://localhost:9000/ds503/hw2/input/centroids.txt";
-//        String newCentroidsPath = "hdfs://localhost:9000/ds503/hw2/output/kmeans/";
         conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/core-site.xml"));
         conf.addResource(new Path("/Users/badgod/badgod_documents/technologies/hadoop-3.1.2/etc/hadoop/hdfs-site.xml"));
         FileSystem fs = FileSystem.get(conf);

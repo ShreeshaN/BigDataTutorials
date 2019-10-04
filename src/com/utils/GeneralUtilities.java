@@ -1,3 +1,14 @@
+/**
+@created on: 18/3/19,
+@author: Shreesha N,
+@version: v0.0.1
+@system name: badgod
+Description:
+
+..todo::
+
+*/
+
 package com.utils;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -111,4 +122,8 @@ public class GeneralUtilities {
         fs.close();
     }
 
+    public static boolean checkIfCoordinateWithinRectangle(float bottomLeftX, float bottomLeftY, float topRightX, float topRightY, float x, float y) {
+        return x >= bottomLeftX && x <= topRightX && y >= bottomLeftY && y <= topRightY;
+
+    }
 }

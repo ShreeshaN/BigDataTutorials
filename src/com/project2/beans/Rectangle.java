@@ -1,3 +1,14 @@
+/**
+@created on: 18/3/19,
+@author: Shreesha N,
+@version: v0.0.1
+@system name: badgod
+Description:
+
+..todo::
+
+*/
+
 package com.project2.beans;
 
 import com.utils.StringConstants;
@@ -13,11 +24,6 @@ public class Rectangle {
         this.w = w;
         this.bottomX = bottomX;
         this.bottomY = bottomY;
-    }
-
-    public static boolean checkIfCoordinateWithinRectangle(float bottomLeftX, float bottomLeftY, float topRightX, float topRightY, float x, float y) {
-        return x >= bottomLeftX && x <= topRightX && y >= bottomLeftY && y <= topRightY;
-
     }
 
     public static boolean checkIfRectangleWithinWindow(Rectangle rectangle, float wX1, float wY1, float wX2, float wY2) {
