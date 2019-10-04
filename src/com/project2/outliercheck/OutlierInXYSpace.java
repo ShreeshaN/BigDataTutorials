@@ -40,8 +40,6 @@ public class OutlierInXYSpace {
         private int xRange;
         private int yRange;
         private int radius;
-        private int thresholdK;
-        private int numberOfSubspacesInXYPlane;
         private int dividerX;
         private int dividerY;
         List<SubSpace> subSpaceList;
@@ -53,7 +51,6 @@ public class OutlierInXYSpace {
             xRange = Integer.parseInt(conf.get("xRange"));
             yRange = Integer.parseInt(conf.get("yRange"));
             radius = Integer.parseInt(conf.get("radius"));
-            thresholdK = Integer.parseInt(conf.get("thresholdK"));
             divisions = Integer.parseInt(conf.get("divisions"));
             dividerX = divisions;
             dividerY = divisions;
