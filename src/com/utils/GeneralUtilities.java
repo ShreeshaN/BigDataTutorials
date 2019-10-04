@@ -5,9 +5,7 @@ import org.apache.hadoop.fs.Path;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class GeneralUtilities {
     private static Random random = new Random();
@@ -84,6 +82,33 @@ public class GeneralUtilities {
             lines.add(line.trim());
         }
         return lines;
+    }
+
+    public static void removeDuplicates(String filename, FileSystem fs) throws IOException {
+        /**
+         * Use this method to read file
+         */
+        Path file = new Path(filename);
+
+        // read
+        Set<String> lines = new HashSet<>();
+        String line = "";
+        BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(file)));
+        while ((line = reader.readLine()) != null) {
+            lines.add(line.trim());
+        }
+
+        // write
+        if (fs.exists(file)) {
+            fs.delete(file, true);
+        }
+        OutputStream os = fs.create(file);
+        BufferedWriter br = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+        for (Object s : lines) {
+            br.write(s.toString() + "\n");
+        }
+        br.close();
+        fs.close();
     }
 
 }
