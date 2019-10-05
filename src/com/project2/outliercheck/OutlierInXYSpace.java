@@ -35,9 +35,6 @@ import java.util.List;
 
 public class OutlierInXYSpace {
 
-    public static double radius;
-    public static int thresholdK;
-
 
     public static class CustomMapper
             extends Mapper<Object, Text, IntWritable, Text> {
@@ -76,18 +73,20 @@ public class OutlierInXYSpace {
     }
 
     public static class CustomReducer
-            extends Reducer<IntWritable, Text, Text, Text> {
+            extends Reducer<IntWritable, Text, IntWritable, Text> {
 
         public void reduce(IntWritable key, Iterable<Text> values,
                            Context context
         ) throws IOException, InterruptedException {
-
             // input
             // key - subspace id
             // value - point
             String[] pointsInString;
             List<String> neglectList = new ArrayList<>();
             List<double[]> points = new ArrayList<>();
+            Configuration conf = context.getConfiguration();
+            int thresholdK = Integer.parseInt(conf.get("thresholdK"));
+            double radius = Double.parseDouble(conf.get("radius"));
             for (Text point : values) {
                 pointsInString = point.toString().split("_");
                 double[] xy = {Double.parseDouble(pointsInString[0]), Double.parseDouble(pointsInString[1])};
@@ -105,7 +104,7 @@ public class OutlierInXYSpace {
                     // output
                     // key - "outlier"
                     // value - point
-                    context.write(new Text(""), new Text(point[0] + "," + point[1]));
+                    context.write(new IntWritable(0), new Text(point[0] + "," + point[1]));
             }
 
         }
@@ -117,23 +116,24 @@ public class OutlierInXYSpace {
         }
         Configuration conf = new Configuration();
 
+
+        // defining all the input variables required
         String inputDataPath = args[0];
         String outputPath = args[1];
-
-        radius = Double.parseDouble(args[3]);
-        thresholdK = Integer.parseInt(args[4]);
         conf.set("xRange", "10000");
         conf.set("yRange", "10000");
+        conf.set("radius", args[3]);
+        conf.set("thresholdK", args[4]);
         conf.set("divisions", "100");
         conf.set("outputPath", outputPath);
 
         // add the below code if you are reading/writing from/to HDFS
-        String hadoopHome = System.getenv("HADOOP_HOME");
-        if (hadoopHome == null) {
-            throw new Exception("HADOOP_HOME not found. Please make sure system path has HADOOP_HOME point to hadoop installation directory");
-        }
-        conf.addResource(new Path(hadoopHome + "/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path(hadoopHome + "/etc/hadoop/hdfs-site.xml"));
+//        String hadoopHome = System.getenv("HADOOP_HOME");
+//        if (hadoopHome == null) {
+//            throw new Exception("HADOOP_HOME not found. Please make sure system path has HADOOP_HOME point to hadoop installation directory");
+//        }
+//        conf.addResource(new Path(hadoopHome + "/etc/hadoop/core-site.xml"));
+//        conf.addResource(new Path(hadoopHome + "/etc/hadoop/hdfs-site.xml"));
 
         FileSystem fs = FileSystem.get(conf);
         fs.delete(new Path(outputPath), true);
