@@ -9,7 +9,7 @@ Description:
 
 */
 
-package com.project2.beans;
+package com.project2.custominputformat;
 
 
 import org.apache.hadoop.conf.Configuration;

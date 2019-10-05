@@ -26,7 +26,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class KMeans {
@@ -37,8 +38,7 @@ public class KMeans {
     public static class CustomMapper
             extends Mapper<Object, Text, Text, Text> {
 
-        List<List<Float>> centroids = null;
-        Map<String, Integer> centroidIdMap = new HashMap<>();
+        List<List<Double>> centroids = null;
 
         protected void setup(Context context) throws IOException, InterruptedException {
             centroids = new ArrayList<>();
@@ -50,15 +50,12 @@ public class KMeans {
                     FileSystem fs = FileSystem.get(context.getConfiguration());
                     Path getFilePath = new Path(cacheFiles[0].toString());
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(getFilePath)));
-                    int lineNumber = 0;
                     while ((line = reader.readLine()) != null) {
-                        lineNumber++;
                         String[] values = line.split(",");
-                        List<Float> c = new ArrayList<>();
+                        List<Double> c = new ArrayList<>();
                         for (int i = 0; i < values.length; i++) {
-                            c.add(Float.parseFloat(values[i]));
+                            c.add(Double.parseDouble(values[i].trim()));
                         }
-                        centroidIdMap.putIfAbsent(StringUtils.join(c, ","), lineNumber);
                         centroids.add(c);
 
                     }
@@ -69,19 +66,19 @@ public class KMeans {
             }
         }
 
-        public float getEuclideanDistance(List<Float> arr1, List<Float> arr2) {
-            float sum = 0;
+        public double getEuclideanDistance(List<Double> arr1, List<Double> arr2) {
+            double sum = 0;
             for (int i = 0; i < arr1.size(); i++) {
                 sum = sum + (arr1.get(i) - arr2.get(i)) * (arr1.get(i) - arr2.get(i));
             }
-            return (float) Math.sqrt(sum);
+            return Math.sqrt(sum);
         }
 
-        public List<Float> getClosestCentroidForDataPoint(List<List<Float>> centroids, List<Float> dataPoint) {
-            float leastDistance = Integer.MAX_VALUE;
-            List<Float> closestCentroid = new ArrayList<>();
+        public List<Double> getClosestCentroidForDataPoint(List<List<Double>> centroids, List<Double> dataPoint) {
+            double leastDistance = Integer.MAX_VALUE;
+            List<Double> closestCentroid = new ArrayList<>();
             for (int i = 0; i < centroids.size(); i++) {
-                float distance = getEuclideanDistance(centroids.get(i), dataPoint);
+                double distance = getEuclideanDistance(centroids.get(i), dataPoint);
                 if (distance < leastDistance) {
                     closestCentroid = centroids.get(i);
                     leastDistance = distance;
@@ -94,15 +91,19 @@ public class KMeans {
         public void map(Object key, Text value, Context context
         ) throws IOException, InterruptedException {
 
-            List<Float> dataPointList = new ArrayList<>();
-            Float[] dataPoint = Arrays.stream(value.toString().split(",")).map(Float::valueOf).toArray(Float[]::new);
-            Collections.addAll(dataPointList, dataPoint);
-            List<Float> closestCentroid = getClosestCentroidForDataPoint(centroids, dataPointList);
+            List<Double> dataPointList = new ArrayList<>();
+            String[] dataPointStr = value.toString().split(",");
+            for (String s : dataPointStr)
+                dataPointList.add(Double.parseDouble(s));
+            List<Double> closestCentroid = getClosestCentroidForDataPoint(centroids, dataPointList);
 
-            String k = centroidIdMap.get(StringUtils.join(closestCentroid, ",")).toString();
             // key - id of centroid that matches the data point
             // value - data point
-            context.write(new Text(k), new Text(value));
+            String a = StringUtils.join(dataPointList, ",");
+            if (a.split(",").length > 2) {
+                System.out.println("");
+            }
+            context.write(new Text(StringUtils.join(closestCentroid, ",")), new Text(StringUtils.join(dataPointList, ",")));
         }
     }
 
@@ -114,23 +115,25 @@ public class KMeans {
         ) throws IOException, InterruptedException {
 
             // input
-            // key - centroid id
+            // key - centroid
             // value - list of data points belonging to the centroid
-
-            List<Float> summedUpValues = new ArrayList<>();
+            List<Integer> summedUpValues = new ArrayList<>();
             int count = 0;
             for (Text val : values) {
                 String[] dataPoint = val.toString().split(",");
-                for (int j = 0; j < dataPoint.length; j++) {
-                    if (count == 0)
-                        summedUpValues.add(Float.parseFloat(dataPoint[j]));
-                    else
-                        summedUpValues.set(j, summedUpValues.get(j) + Float.parseFloat(dataPoint[j]));
+                for (int i = 0; i < dataPoint.length; i++) {
+                    if (count == 0) {
+                        summedUpValues.add((int) Double.parseDouble(dataPoint[i]));
+                    } else {
+                        summedUpValues.set(i, (int) ((summedUpValues.get(i) + Double.parseDouble(dataPoint[i]))));
+                    }
                 }
                 count++;
+
             }
+
             // output
-            // key - centroid id
+            // key - centroid
             // value - summed up values as one string, count
             context.write(key, new Text(StringUtils.join(summedUpValues, ",") + "," + count));
         }
@@ -144,37 +147,39 @@ public class KMeans {
         ) throws IOException, InterruptedException {
 
             // input
-            // key - centroid id
+            // key - centroid
             // value - summed up values as one string, count
+            int localCount = 0;
             int globalCount = 0;
-            int reducerCount = 0;
-            List<Float> summedUpValues = new ArrayList<>();
+            List<Double> summedUpValues = new ArrayList<>();
+            double[] arr = {0, 0};
             for (Text val : values) {
                 String[] dataPoint = val.toString().split(",");
-                globalCount += Integer.parseInt(dataPoint[dataPoint.length - 1]);
-                for (int j = 0; j < dataPoint.length - 1; j++) {
-                    if (reducerCount == 0)
-                        summedUpValues.add(Float.parseFloat(dataPoint[j]));
-                    else
-                        summedUpValues.set(j, summedUpValues.get(j) + Float.parseFloat(dataPoint[j]));
+                globalCount += Double.parseDouble(dataPoint[dataPoint.length - 1]);
+                for (int i = 0; i < dataPoint.length - 1; i++) {
+                    if (localCount == 0) {
+                        summedUpValues.add(Double.parseDouble(dataPoint[i]));
+                    } else {
+                        summedUpValues.set(i, summedUpValues.get(i) + Double.parseDouble(dataPoint[i]));
+                    }
                 }
-                reducerCount++;
+                localCount++;
+
             }
             // finding the new average i.e the centroid
             for (int i = 0; i < summedUpValues.size(); i++) {
                 summedUpValues.set(i, summedUpValues.get(i) / globalCount);
             }
-            // key - centroid id
+
+            // key - empty
             // value - new centroid
-            context.write(new Text(""), new Text(StringUtils.join(summedUpValues, ",")));
+            context.write(new Text(""), new Text(arr[0] + "," + arr[1]));
         }
 
     }
 
 
     public static void main(String[] args) throws Exception {
-//        System.out.println();
-//        System.exit(1);
 
         if (args.length < 4) {
             throw new Exception("Pass all the required arguments. Input file, Centroids file path, Output filepath, number of iterations");
@@ -183,8 +188,9 @@ public class KMeans {
         String inputData = args[0];
         String inputCentroidsPath = args[1];
         String newCentroidsPath = args[2];
+
         String centroidsFilename = "centroids.txt";
-        int numOfReducers = 5;
+        int numOfReducers = 1;
         int numOfIterations = Integer.parseInt(args[3]);
         String hadoopHome = System.getenv("HADOOP_HOME");
         if (hadoopHome == null) {
@@ -210,7 +216,6 @@ public class KMeans {
 
             FileInputFormat.addInputPath(job, new Path(inputData));
             FileOutputFormat.setOutputPath(job, new Path(newCentroidsPath + "/" + i));
-
             // Add distributed cache file
             try {
                 if (i == 0)
@@ -232,7 +237,7 @@ public class KMeans {
             GeneralUtilities.writeIterableToFileHDFS(intermediateCentroids, newCentroidsPath + "/" + i + "/" + centroidsFilename, fs);
 
 
-            // if i==0 which means its the first iteration, do not run the compare logic
+//             if i==0 which means its the first iteration, do not run the compare logic
             if (i != 0) {
 
                 // compare logic, pick the single file that was saved in previous step and compare it to the single file that was
@@ -244,8 +249,6 @@ public class KMeans {
                 }
             }
         }
-        if (fs != null)
-            fs.close();
     }
 
 }

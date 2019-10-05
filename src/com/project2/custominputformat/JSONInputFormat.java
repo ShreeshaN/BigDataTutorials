@@ -1,17 +1,15 @@
 /**
-@created on: 18/3/19,
-@author: Shreesha N,
-@version: v0.0.1
-@system name: badgod
-Description:
-
-..todo::
-
-*/
+ * @created on: 18/3/19,
+ * @author: Shreesha N,
+ * @version: v0.0.1
+ * @system name: badgod
+ * Description:
+ * <p>
+ * ..todo::
+ */
 
 package com.project2.custominputformat;
 
-import com.project2.beans.JSONRecordReader;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
