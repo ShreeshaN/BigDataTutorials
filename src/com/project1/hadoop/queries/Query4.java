@@ -132,9 +132,9 @@ public class Query4 {
 
 
     public static void main(String[] args) throws Exception {
-        String inputPathTransactions = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt";
-        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt";
-        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/shree_output/query4/";
+        String inputPathTransactions = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project1/shree_data/transactions.txt";
+        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project1/shree_data/customers.txt";
+        String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/project1/shree_output/query4/";
 
         Configuration conf = new Configuration();
 

@@ -80,12 +80,12 @@ public class CustomInputFormat {
         String outputPath = args[1];
 
         // add the below code if you are reading/writing from/to HDFS
-        String hadoopHome = System.getenv("HADOOP_HOME");
-        if (hadoopHome == null) {
-            throw new Exception("HADOOP_HOME not found. Please make sure system path has HADOOP_HOME point to hadoop installation directory");
-        }
-        conf.addResource(new Path(hadoopHome + "/etc/hadoop/core-site.xml"));
-        conf.addResource(new Path(hadoopHome + "/etc/hadoop/hdfs-site.xml"));
+//        String hadoopHome = System.getenv("HADOOP_HOME");
+//        if (hadoopHome == null) {
+//            throw new Exception("HADOOP_HOME not found. Please make sure system path has HADOOP_HOME point to hadoop installation directory");
+//        }
+//        conf.addResource(new Path(hadoopHome + "/etc/hadoop/core-site.xml"));
+//        conf.addResource(new Path(hadoopHome + "/etc/hadoop/hdfs-site.xml"));
 
         FileSystem fs = FileSystem.get(conf);
         fs.delete(new Path(outputPath), true);

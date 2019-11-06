@@ -145,8 +145,8 @@ public class Query2 {
 
 
     public static void main(String[] args) throws Exception {
-        String inputPathTransactions = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/transactions.txt";
-        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/shree_data/customers.txt";
+        String inputPathTransactions = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project1/shree_data/transactions.txt";
+        String inputPathCustomers = "/Users/badgod/badgod_documents/github/BigDataTutorials/input/project1/shree_data/customers.txt";
         String outputPath = "/Users/badgod/badgod_documents/github/BigDataTutorials/output/shree_output/query2/";
 
         Configuration conf = new Configuration();
