@@ -33,6 +33,44 @@ import java.util.List;
 //          (outputformatter will just format output on node level,right ?)
 
 
+// Python code for verification purposes
+//        min_val = 0
+//        max_val = 20
+//        no_of_points = 40
+//        radius = 4
+//        thresholdk = 4
+//
+//        # points = [(random.randint(min_val, max_val), random.randint(min_val, max_val)) for _ in range(no_of_points)]
+//        points = [1, 1, 2, 1, 3, 2, 2, 2, 1, 2, 1, 2, 2, 4, 9, 5, 7, 6, 4, 8, 1, 3]
+//        x = [k for i, k in enumerate(points) if i % 2 == 0]
+//        y = [k for i, k in enumerate(points) if i % 2 != 0]
+//        points = [(a, b) for a, b in zip(x, y)]
+//        points_count = {}
+//        print("*** Generated points ***")
+//        print(*points, sep="\n")
+//
+//        for a, b in points:
+//        fig = plt.figure()
+//        range_tuple = (min_val, max_val)
+//        plt.grid()
+//        ax = fig.gca()
+//        ax.set_xticks(numpy.arange(*range_tuple))
+//        ax.set_yticks(numpy.arange(*range_tuple))
+//        for p, k in points:
+//        plt.scatter(p, k)
+//        circle1 = plt.Circle((a, b), 4, clip_on=False, fill=False)
+//        ax.add_artist(circle1)
+//        plt.savefig("/Users/badgod/badgod_documents/" + str(a) + "_" + str(b) + ".png")
+//
+//        # get count
+//        points_count[str(a) + "_" + str(b)] = get_number_of_points_in_circle(points, a, b, radius)
+//
+//        print('*** Outliers ***')
+//        for point in points:
+//        if points_count[str(point[0]) + "_" + str(point[1])] < thresholdk:
+//        print(point)
+
+
 public class OutlierInXYSpace {
 
 
