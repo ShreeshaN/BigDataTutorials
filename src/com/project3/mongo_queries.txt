@@ -1,0 +1,165 @@
+
+// 2. Report all documents of people who got less than 3 awards or have contribution in “FP”
+db.test_collection.find({
+     "$or":[
+     {awards:{$exists:true},$where: "this.awards.length<3"},
+        {contribs:{"$in":["FP"]}}
+     ]
+})
+
+------------------------------------------------------------------------------------------------------------------
+
+
+// 3. Update the document of “Guido van Rossum” to add “OOP” to the contribution list.
+db.test_collection.findOneAndUpdate({
+    "$and":[
+        {
+            "name.first":"Guido",
+        },
+        {
+            "name.last":"van Rossum"
+        }
+        ]
+    },
+    {
+        $addToSet: { contribs: "OOP" }
+    }
+)
+
+------------------------------------------------------------------------------------------------------------------
+
+// 4. Insert a new filed of type array, called “comments”, into the document of “Alex Chen” storing the following comments:
+// “He taught in 3 universities”, “died from cancer”, “lived in CA”
+db.test_collection.findOneAndUpdate({
+    "$and":[
+        {
+            "name.first":"Alex",
+        },
+        {
+            "name.last":"Chen"
+        }
+        ]
+    },
+    {
+        $set: { comments: ["He taught in 3 universities","died from cancer", "lived in CA"] }
+    }
+)
+
+------------------------------------------------------------------------------------------------------------------
+
+// 5. For each contribution by “Alex Chen”, say X, list the peoples’ names (first and last) who have contribution X.
+// E.g., Alex Chen has two contributions in “C++” and “Simula”. Then, the output should be similar to:
+// a. {Contribution: “C++”,
+// People: [{first: “Alex”, last: “Chen”}, {first: “David”, last: “Mark”}]}, { Contribution: “Simula”,
+// ....}
+var alexContribs = db.test_collection.findOne({
+    "$and":[
+        {
+            "name.first":"Alex",
+        },
+        {
+            "name.last":"Chen"
+        }
+        ]
+    }
+)["contribs"]
+
+final_contributors = {}
+
+for (i=0;i<alexContribs.length;i++){
+    final_contributors[alexContribs[i]] = []
+    var contributors = db.test_collection.find({
+        "contribs":{"$in":[alexContribs[i]]}
+    });
+    while(contributors.hasNext()){
+        var contributor = contributors.next();
+        final_contributors[alexContribs[i]].push(contributor.name)
+    }
+}
+
+print(JSON.stringify(final_contributors))
+
+
+------------------------------------------------------------------------------------------------------------------
+
+// 6. Report the distinct organization that gave awards. This information can be found in the “by” field inside the “awards” array.
+// The output should be an array of the distinct values, e.g., [“wpi’, “acm’, ...]
+db.test_collection.distinct("awards.by")
+
+
+------------------------------------------------------------------------------------------------------------------
+
+// 7. Delete from all documents any award given on 2011.
+db.test_collection.deleteMany({
+    "awards.year":2011
+    })
+
+------------------------------------------------------------------------------------------------------------------
+
+
+// 8.Report only the names (first and last) of those individuals who won at least two awards in 2001.
+
+db.test_collection.aggregate([
+      {$unwind:'$awards'},
+      {$match:{'awards.year':2001}},
+      {$group:{_id:"$_id", name:{"$first":"$name"}, awards:{$push:'$awards'}}}
+])
+
+
+------------------------------------------------------------------------------------------------------------------
+
+
+// 9. Report the document with the largest id. First, you need to find the largest _id (using a CRUD statement),
+// and then use that to report the corresponding document.
+// DOUBT REGARDING IDS
+db.test_collection.find().sort({_id:-1}).limit(3)
+
+
+------------------------------------------------------------------------------------------------------------------
+
+// 10. Report only one document where one of the awards is given by “ACM”.
+db.test_collection.findOne({"awards.by":"ACM"})
+
+
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
+
+
+// 2.1. Write an aggregation query that group by the award name, i.e., the “award” field inside the “awards” array, and
+// reports the count of each award.
+
+db.test_collection.aggregate([
+    {
+        $unwind:"$awards"
+    },
+    {
+     $group: {
+        _id:"$awards.award",
+        count: { $sum: 1}
+     }
+  }
+])
+
+
+------------------------------------------------------------------------------------------------------------------
+
+// 2.2. Write an aggregation query that groups by the birth year, i.e., the year within the “birth” field, are report an // array of _ids for each birth year
+db.test_collection.aggregate([
+      {$group :
+          {
+              _id : { year: { $year: "$birth" }},
+              ids:{$push:"$_id"}
+
+          }
+      }
+])
+
+
+------------------------------------------------------------------------------------------------------------------
+
+// 2.3. Report the document with the smallest and largest _ids. You first need to find the values of the smallest and largest, and then report their documents.
+
+db.test_collection.find().sort({_id: 1}).limit(1);
+db.test_collection.find().sort({_id: -1}).limit(1);
+
+
